@@ -17,9 +17,8 @@ defmodule Html do
   end
 
   defmacro tag(name, attrs \\ []) do 
-    {inner, attrs} = Dict.pop(attrs, :do)
-    #{inner, attrs} = Map.pop(attrs, :do)
-    #IO.inspect inner
+    {inner, attrs} = Keyword.pop(attrs, :do)
+    #{inner, attrs} = Dict.pop(attrs, :do)
     quote do: tag(unquote(name), unquote(attrs), do: unquote(inner))
   end
   defmacro tag(name, attrs, do: inner) do 

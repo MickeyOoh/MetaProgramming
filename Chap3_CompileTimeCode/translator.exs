@@ -49,8 +49,7 @@ defmodule Translator do
       <<"%{" <> rest>>, acc ->
          key = String.to_atom(String.trim_trailing(rest, "}"))
          quote do 
-           map = Enum.into(bindings, %{})
-           unquote(acc) <> to_string(Map.fetch!(map, unquote(key)))
+           unquote(acc) <> to_string(Keyword.fetch!(bindings, unquote(key)))
          end
       segment, acc -> quote do: (unquote(acc) <> unquote(segment))
     end)

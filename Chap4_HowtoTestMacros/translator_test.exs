@@ -80,10 +80,7 @@ defmodule TranslatorTest do
       [[def(t("en", "foo", bindings)) do
         "" <> "bar"
       end, def(t("en", "bar", bindings)) do
-        (
-          map = Enum.into(bindings, %{})
-          "" <> to_string(Map.fetch!(map, :baz))
-        ) <> ""
+        ("" <> to_string(Keyword.fetch!(bindings, :baz))) <> ""
       end]]
       def(t(_locale, _path, _bindings)) do
         {:error, :no_translation}

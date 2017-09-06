@@ -33,6 +33,31 @@ We'll support _use Translator_ to allow any module to have a dictionary of trans
 Our next step is to implement the skeleton of our _Translator_ module by defining the '__using__', '__before_compile__', and _locale_ macros that we planned when fleshing out the surface area of our API.
 
 [translator_step2.exs](translator_step2.exs)
+```
+defmodule Translator do 
+
+  defmacro __using__(_options) do 
+    quote do 
+      Module.register_attribute __MODULE__, :locales, accumulate: true,
+                                      persist: false
+      import unquote(__MODULE__), only: [locale: 2]
+      @before_compile unquote(__MODULE__)
+    end
+  end
+  defmacro __before_compile__(env) do 
+    compile(Module.get_attribute(env.module, :locales))
+  end
+
+  defmacro locale(name, mappings) do 
+    quote bind_quoted: [name: name, mappings: mappings] do 
+      @locales {name, mappings}
+    end
+  end
+  def compile(translations) do 
+    # TBD: Return AST for all translation function definitions
+  end
+end
+```
 
 We wired up the '__before_compile__' hook in our *Translator.__using__* macro. We added a placeholder to delegate to a *compile* function to carry out the code generation from our locale registrations.
 
@@ -40,9 +65,60 @@ We wired up the '__before_compile__' hook in our *Translator.__using__* macro. W
 Let's begin the bulk of our implementation by transforming the locale registrations into function definitions within our _compile_ placeholder from Step2. Our goal is to map our translations into a large AST of t/3 functions.
 We also need to add catch-all clauses that return {:error, :no_translation}.
 
+Update your *compile/1* function with the following code:
 [translator_step3.exs](translator_step3.exs)
+```
+def compile(translations) do 
+  translations_ast = for {locale, mappings} <- translations do 
+	  deftranslations(locale, "", mappings)
+	end
 
+	quote do 
+	  def t(locale, path, bindings \\ [])
+		unquote(translations_ast)
+		def t(_locale, _path, _bindings), do: {:error, :no_translation}
+	end
+end
+
+defp deftranslations(locales, current_path, mappings) do 
+  # TBD: Return an AST of the t/3 function defs for the given locale
+end
+```
+Let's check progress:
+```
+iex> c "translator_step3.exs"
+iex> c "i18n.exs"
+iex> I18n.t("en", "flash.hello", first: "Chris". last: "McCord")
+{:error, :no_translation}
+```
+
+Fill in your deftranslations function with this code:
+```
+defp deftanslations(locale, current_path, mappings) do
+  for {key, val} <- mappings do 
+		path = append_path(current_path, key)
+		if Keyword.keyword?(val) do 
+			deftranslations(locale, path, val)
+		else
+			quote do 
+			  def t(unquote(locale), unquote(path), bindings) do 
+				  unquote(interpolate(val))
+				end
+			end
+		end
+	end
+end
+
+defp interpolate(string) do 
+  string # TBD interpolate bindings within string
+end
+
+defp append_path("", next), do: to_string(next)
+defp append_path(current, next), do: "#{current}.#{next}"
+```
+[translator_step4.exs](translator_step4.exs)
 
 #### Macro.to_string: Make Sense of Your Generated Code
+
 #### Final Step: Identify Areas for Compile-Time Optimizations
 
