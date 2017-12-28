@@ -210,5 +210,74 @@ This subtle shift places all of the implementation concerns as a normal function
 |> Emailer.send_email("you@example.com", "me@example.com", "Hi!", "")
 ```
 
+### Kernel.SpecialForms:Know Your Environment and Limitations
+Elixir is an incredibly extensible language, but even it has areas that are special and not overridable. Knowing where these are and why they exist will help keep you grounded in what is and isn't possible when extending the language.
+The Kernel SpecialForms module defines a set of constructs that you can't override. They make up the basic building blocks of the language and contain macros such as alias, case, {}, and <<>>. 
 
+* __ENV__: Returns a Macro ENV struct containing current environment infomation
+* __MODULE__: Returns the current module name as an atom, equivalent to __ENV__.module
+* __DIR__: the current directory
+* __CALLER__: Returns the caller's environment information as a Macro.ENV struct
+
+```
+iex> __ENV__.file
+"iex"
+iex> __ENV__.line
+2
+iex> __ENV__.vars
+[]
+iex> name = "Elixir"
+iex> version = "~> 1.0"
+iex> __ENV__.vars
+[name: nil, version: nil]
+iex> binding
+[name: "Elixir", version: "~> 1.0"]
+```
+
+### Bending the Rules
+#### Abusing Valid Elixir Syntax
+Rewriting the AST to change the meaning of valid Elixir expressions probably sounds evil to most people. In some cases, it's actually a powerful tool.
+Consider Elixir's Eco library, which is a database wrapper and language Integragrated Query system. 
+
+```
+query = from user in user,
+    where: user.age > 21 and user.enrolled == true,
+		select: user
+```
+Ecto converts this completely valid Elixir expression into a string of SQL. It abuses operators suchas *in*, *and*, *==*, and *>* to form SQL expressions out of valid Elixir code.
+
+Ecto is a large project worthy of its own book, but let's imagine how we could implement a similar library. 
+```
+iex> quote do 
+...>   from user in user, 
+...>      where: user.age > 21 and user.enrolled == true,
+...>      select: user
+...> end
+{:from, [],
+ [{:in, [context: Elixir, import: Kernel],
+    [{:user, [], Elixir}, {:__aliases__, [alias: false], [:User]}]},
+		  [where: {:and, [context: Elixir, import: Kernel],
+			    [{:>, [context: Elixir, import: Kernel],
+					      [{{:., [], [{:user, [], Elixir}, :age]}, [], []}, 21]},
+								     {:==, [context: Elixir, import: Kernel],
+										       [{{:., [], [{:user, [], Elixir}, :enrolled]}, [], []}, true]}]},
+													    select: {:user, [], Elixir}]]}
+```
+Looking at the AST of an Ecto query, we can begin to see how macros would let us abuse Elixir syntax for fun and profit. 
+
+#### Learn by Tinkering
+
+```
+iex> quote do 
+...>   the answer should be between 3 and 5
+...>   the list should contain 10
+...>   the User name should resemble "Max"
+...> end |> Macro.to_string |> IO.puts
+(
+  the(answer(should(be(between(3 and 5)))))
+	  the(list(should(contain(10))))
+		  the(user(name(should(resemble("Max")))))
+			)
+:ok
+```
 

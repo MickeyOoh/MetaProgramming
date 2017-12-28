@@ -19,4 +19,6 @@ defmodule MyModule do
   Mod.definfo
 end
 
-
+#defmodule Test do 
+#  MyModule.friendly_info
+#end

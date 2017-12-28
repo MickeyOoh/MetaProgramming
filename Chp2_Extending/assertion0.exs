@@ -4,19 +4,15 @@ defmodule Assertion do
     quote do 
       import unquote(__MODULE__)
       Module.register_attribute __MODULE__, :tests, accumulate: true
-      #def run do 
-      #  IO.puts "use Running the tests (#{inspect @tests})"
-      #end
       @before_compile unquote(__MODULE__)
     end
   end
 
   defmacro __before_compile__(_env) do 
     quote do 
-      def run, do: Assertion.Test.run(@tests, __MODULE__)
-      #def run do 
-      #  IO.puts "Running the tests (#{inspect(@tests)})"
-      #end
+      def run do 
+        IO.puts "Running the tests (#{inspect(@tests)})"
+      end
     end
   end
 

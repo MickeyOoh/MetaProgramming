@@ -1,7 +1,8 @@
-## The Language of Macros
+The Language of Macros
+----
 
-#### The Abstract Syntax Tree( AST)
-To master metaprogramming, you first have to understand how Elixir code is respresented internlly by the abstract syntax tree(AST).
+* The Abstract Syntax Tree( AST)
+   To master metaprogramming, you first have to understand how Elixir code is respresented internlly by the abstract syntax tree(AST).
 
 ```math.exs
 iex> c("math.exs")
@@ -19,15 +20,35 @@ iex> Math.say 18 * 4
 we can see that macors, like functions, can have multiple signatures. Havingthe example representation from our quoted results allowed us to easily bind the left-and right-hand side values to variables and print a message accordingly.
 To complete the macro, we used _quote_ to return an AST for the caller to replace our *Marh.say* invocations. Here we also used _unqoute_ for the first time. We'll expand on _quote_ and _unquote_ in detail in a moment. For now, all you need to know is these two macros work together to help you build ASTs while keeping track of where your code executes.
 
-### Macro Rules
+Macro Rules
+----
  Macros give us awesome power, but with great power comes great responsibility.
+
 #### Rule1: Don't Write Macros
-We have to remember that writing code to produce code requires special care.It's easy to get caught in our own web of code generation, and many have programs difficult to debug and reason about. There should always be a clear advantage when we attack problems with metaprogramming. In many cases, standard function definitons are a superior choice if code generation is not required.
+We have to remember that writing code to produce code requires special care.
+It's easy to get caught in our own web of code generation, and many have 
+programs difficult to debug and reason about. There should always be a clear 
+advantage when we attack problems with metaprogramming. In many cases, 
+standard function definitons are a superior choice if code generation is not 
+required.
 
 #### Rule2: Use Macros Gratuitously
-Metaprogramming is sometimes framed as complex and fragile. Together, we'll dispel these myths by producing robust, clear programs that offer productive advantages in a fraction of the required code.
+Metaprogramming is sometimes framed as complex and fragile. Together, we'll 
+dispel these myths by producing robust, clear programs that offer productive 
+advantages in a fraction of the required code.
 
-### The Abstract Syntax Tree(AST) -- Demystified
+The Abstract Syntax Tree(AST) -- Demystified
+----
+It's time to explore the AST in depth to learn the different ways your source
+code is represented. You might be tempted to jump in and start writing macros
+at this point, but truly understanding the AST is essential as you get into
+advanced metaprogramming. Once we uncover the nuances, you'll find your
+Elixir code is much closer to the AST than you might have imagined. This
+revelation will change the way you think about solving problems and drive
+your macro design decisions going forward. After reviewing the finer details
+of the AST. you'll be ready to begin the metaprogramming exercises. So hang
+in there. You'll be creating new language features before you know it.
+
 
 #### The Structure of the AST
 ```
@@ -96,6 +117,7 @@ We must first _require ControlFlow_ before invoking its macros in cases where th
 A macro's purpose in life is to take in an AST representation and return an AST representation, so we immediately begin a _quote_ to return an AST. Within the *quote*, we perform a single line of code generation, transforming the _unless_ keyword into an if! expression:
 
 #### **unquote**
+----
 The **unquote** macro allows values to be injected into an AST that is being defined. You can think of *quote/unquote* as string interpolation for code.
 If you were building up a string and needed to inject the value of a variabe into that string, you would interpolate it. The same goes when constructing an AST. We use _quote_ to begin generating an AST and _unquote_ to inject values from an outside context. This allows the outside bound variables, expression and block, to be injected directly into our if! transformation.
 We'll use *Code.eval_quoted* to directly evaluate an AST and return the result.
@@ -117,7 +139,8 @@ iex> Code.eval_quoted ast
 {50, []}
 ```
 
-#### Macro Expansion
+Macro Expansion
+-----
 When the compiler encounters a macro, it recursively expands it until the code no longer contains any macro calls. Use Figure to take a high-level walk through this process for a simple _ControlFlow.unless_ expression.
 The diagram whos the compiler's decision process as it encounters macros in the AST. If it finds a macro, it expands it. If the expanded code also contains macros, those get expanded as well. This expansion recursively executes until all macros have been fully expanded into their final generated code. Now imagine the following block fo code being encountered by the compiler:
 

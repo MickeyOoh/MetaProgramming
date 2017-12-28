@@ -1,3 +1,4 @@
+Code.load_file("assertion.exs")
 defmodule MathTest do 
   use Assertion
   test "integers can be multiplied and subtracted" do 
@@ -9,4 +10,6 @@ defmodule MathTest do
     assert 10 / 2 == 5
   end
 end
+
+MathTest.run
 

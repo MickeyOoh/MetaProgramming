@@ -31,3 +31,12 @@ defmodule Assertion.Test do
   end
 end
 
+defmodule Test do 
+  import Assertion
+
+  assert 1 > 2
+
+  assert 5 == 5
+
+  assert 10 * 10 == 100
+end

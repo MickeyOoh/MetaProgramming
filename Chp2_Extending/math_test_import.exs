@@ -1,3 +1,4 @@
+Code.load_file("./assert_step2.exs")
 defmodule MathTest do 
   import Assertion
   def run do 

@@ -1,3 +1,4 @@
+Code.load_file("./assertion0.exs")
 defmodule MathTest do 
   use Assertion
 
@@ -8,3 +9,4 @@ defmodule MathTest do
   end
 end
 
+MathTest.run

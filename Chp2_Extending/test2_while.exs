@@ -6,8 +6,7 @@ defmodule Loop do
           if unquote(expression) do 
             unquote(block)
           else
-            #throw :break
-            Loop.break
+            throw :break
           end  
         end
       catch
@@ -15,7 +14,18 @@ defmodule Loop do
       end
     end
   end
+end
 
-  def break, do: throw :break
+defmodule Test do 
+  import Loop
+
+  run_loop = fn ->
+    pid = spawn(fn -> Process.sleep(4000) end)
+    while Process.alive?(pid) do 
+      IO.puts "#{inspect :erlang.time} Staying alive!"
+      Process.sleep 1000
+    end
+  end
+  run_loop.()
 end
 

@@ -1,0 +1,4 @@
+{:*, 
+  [context: Elixir, import: Kernel], 
+	[ {:number, [], Elixir}, 10]
+}

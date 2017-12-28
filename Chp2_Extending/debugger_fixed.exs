@@ -13,3 +13,8 @@ defmodule Debugger do
   end
 end
 
+#defmodule Test do 
+#  require Debugger 
+#  Debugger.log(remote_api_call.())
+#
+#end

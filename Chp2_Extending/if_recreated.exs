@@ -1,13 +1,9 @@
 defmodule ControlFlow do 
   defmacro my_if(expr, do: if_block) do
-    IO.puts "first"
-    IO.inspect if_block
     if(expr, do: if_block, else: nil)
   end
 
   defmacro my_if(expr, do: if_block, else: else_block) do
-    IO.puts "second"
-    IO.inspect else_block
     quote do 
       case unquote(expr) do 
         result when result in [false, nil] -> unquote(else_block)
@@ -17,16 +13,13 @@ defmodule ControlFlow do
   end
 end
 
-"""
-iex> c("if_recreated.exs")
-
-iex> require ControlFlow
-
-iex> ControlFlow.my_if 1 == 1 do 
-...>   "correct"
-...> else
-...>   "incorrect"
-...> end
-"correct"
-"""
-
+defmodule Test do
+  import ControlFlow
+  IO.puts File.read!("if_recreated.exs") 
+  str = my_if 1 == 1 do 
+          "correct"
+        else
+          "incorrect"
+        end
+  IO.inspect str
+end

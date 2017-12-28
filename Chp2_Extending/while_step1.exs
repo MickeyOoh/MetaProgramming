@@ -13,3 +13,12 @@ defmodule Loop do
   end
 end
 
+defmodule Test do 
+  import Loop
+  cnt = 0
+  while true do 
+    cnt = cnt + 1
+    IO.puts "Looping #{cnt}"
+    Process.sleep(1000)
+  end
+end
